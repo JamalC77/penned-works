@@ -34,5 +34,52 @@ if (hasPostgres) {
 // Export the database instance
 export { db };
 
-// Re-export schema (types are compatible between SQLite and PostgreSQL)
-export * from "./schema";
+// Re-export the correct schema based on environment
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let schemaModule: any;
+if (hasPostgres) {
+  schemaModule = require("./schema-pg");
+} else {
+  schemaModule = require("./schema");
+}
+
+export const users = schemaModule.users;
+export const projects = schemaModule.projects;
+export const chapters = schemaModule.chapters;
+export const versions = schemaModule.versions;
+export const characters = schemaModule.characters;
+export const characterRelationships = schemaModule.characterRelationships;
+export const locations = schemaModule.locations;
+export const timelineEvents = schemaModule.timelineEvents;
+export const storyItems = schemaModule.storyItems;
+export const plotThreads = schemaModule.plotThreads;
+export const worldRules = schemaModule.worldRules;
+export const consistencyFlags = schemaModule.consistencyFlags;
+
+// Re-export types from SQLite schema (types are compatible)
+export type {
+  User,
+  NewUser,
+  Project,
+  NewProject,
+  Chapter,
+  NewChapter,
+  Version,
+  NewVersion,
+  Character,
+  NewCharacter,
+  CharacterRelationship,
+  NewCharacterRelationship,
+  Location,
+  NewLocation,
+  TimelineEvent,
+  NewTimelineEvent,
+  StoryItem,
+  NewStoryItem,
+  PlotThread,
+  NewPlotThread,
+  WorldRule,
+  NewWorldRule,
+  ConsistencyFlag,
+  NewConsistencyFlag,
+} from "./schema";
