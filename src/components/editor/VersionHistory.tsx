@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
-import type { Version } from "@/lib/db/schema";
+import type { Version } from "@/lib/db";
 
 interface VersionHistoryProps {
   chapterId: string;

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
-import type { Project } from "@/lib/db/schema";
+import type { Project } from "@/lib/db";
 
 export default function Home() {
   const router = useRouter();

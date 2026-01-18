@@ -1,7 +1,8 @@
 import path from "path";
 
 // Determine which database to use based on environment
-const hasPostgres = !!process.env.DATABASE_URL;
+// USE_POSTGRES=true forces PostgreSQL mode for production builds where DATABASE_URL is only available at runtime
+const hasPostgres = !!process.env.DATABASE_URL || process.env.USE_POSTGRES === "true";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let db: any;

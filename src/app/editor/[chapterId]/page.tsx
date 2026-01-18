@@ -7,7 +7,7 @@ import VersionHistory from "@/components/editor/VersionHistory";
 import ExpedienceMode from "@/components/editor/ExpedienceMode";
 import StoryWeaverMode from "@/components/editor/StoryWeaverMode";
 import StoryBiblePanel from "@/components/storybible/StoryBiblePanel";
-import type { Chapter, Project } from "@/lib/db/schema";
+import type { Chapter, Project } from "@/lib/db";
 
 type WritingMode = "pure" | "expedience" | "storyweaver";
 

@@ -3,8 +3,7 @@ import { ensureEnvLoaded } from "@/lib/env";
 
 ensureEnvLoaded();
 
-import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
+import { db, users } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 import { eq } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
