@@ -19,7 +19,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
       .select()
       .from(projects)
       .where(and(eq(projects.id, projectId), eq(projects.userId, session.userId)))
-      .get();
+      .limit(1).then((r: unknown[]) => r[0]);
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       .select()
       .from(projects)
       .where(and(eq(projects.id, projectId), eq(projects.userId, session.userId)))
-      .get();
+      .limit(1).then((r: unknown[]) => r[0]);
 
     if (!existing) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -70,7 +70,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       })
       .where(eq(projects.id, projectId));
 
-    const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+    const project = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1).then((r: unknown[]) => r[0]);
 
     return NextResponse.json(project);
   } catch (error) {
@@ -94,7 +94,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
       .select()
       .from(projects)
       .where(and(eq(projects.id, projectId), eq(projects.userId, session.userId)))
-      .get();
+      .limit(1).then((r: unknown[]) => r[0]);
 
     if (!existing) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });

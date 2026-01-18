@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     // Update project's updatedAt
     await db.update(projects).set({ updatedAt: now }).where(eq(projects.id, projectId));
 
-    const chapter = await db.select().from(chapters).where(eq(chapters.id, chapterId)).get();
+    const [chapter] = await db.select().from(chapters).where(eq(chapters.id, chapterId)).limit(1);
 
     return NextResponse.json(chapter, { status: 201 });
   } catch (error) {

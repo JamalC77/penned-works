@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     });
 
-    const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+    const [project] = await db.select().from(projects).where(eq(projects.id, projectId)).limit(1);
 
     return NextResponse.json({ ...project, firstChapterId: chapterId }, { status: 201 });
   } catch (error) {

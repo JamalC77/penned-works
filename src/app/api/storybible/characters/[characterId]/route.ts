@@ -8,7 +8,7 @@ type Params = Promise<{ characterId: string }>;
 export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const { characterId } = await params;
-    const character = await db.select().from(characters).where(eq(characters.id, characterId)).get();
+    const character = await db.select().from(characters).where(eq(characters.id, characterId)).limit(1).then((r: unknown[]) => r[0]);
 
     if (!character) {
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
@@ -36,7 +36,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       })
       .where(eq(characters.id, characterId));
 
-    const updated = await db.select().from(characters).where(eq(characters.id, characterId)).get();
+    const updated = await db.select().from(characters).where(eq(characters.id, characterId)).limit(1).then((r: unknown[]) => r[0]);
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Failed to update character:", error);

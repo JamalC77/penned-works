@@ -10,7 +10,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
   try {
     const { chapterId } = await params;
 
-    const chapter = await db.select().from(chapters).where(eq(chapters.id, chapterId)).get();
+    const chapter = await db.select().from(chapters).where(eq(chapters.id, chapterId)).limit(1).then((r: unknown[]) => r[0]);
 
     if (!chapter) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
@@ -44,7 +44,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
 
     // If createVersion is true, save current state as a version first
     if (createVersion) {
-      const currentChapter = await db.select().from(chapters).where(eq(chapters.id, chapterId)).get();
+      const currentChapter = await db.select().from(chapters).where(eq(chapters.id, chapterId)).limit(1).then((r: unknown[]) => r[0]);
       if (currentChapter && currentChapter.content) {
         await db.insert(versions).values({
           id: uuid(),
@@ -68,7 +68,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       .where(eq(chapters.id, chapterId));
 
     // Update project's updatedAt
-    const chapter = await db.select().from(chapters).where(eq(chapters.id, chapterId)).get();
+    const chapter = await db.select().from(chapters).where(eq(chapters.id, chapterId)).limit(1).then((r: unknown[]) => r[0]);
     if (chapter) {
       await db.update(projects).set({ updatedAt: now }).where(eq(projects.id, chapter.projectId));
     }
@@ -85,7 +85,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
   try {
     const { chapterId } = await params;
 
-    const chapter = await db.select().from(chapters).where(eq(chapters.id, chapterId)).get();
+    const chapter = await db.select().from(chapters).where(eq(chapters.id, chapterId)).limit(1).then((r: unknown[]) => r[0]);
 
     if (!chapter) {
       return NextResponse.json({ error: "Chapter not found" }, { status: 404 });

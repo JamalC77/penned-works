@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     });
 
-    const created = await db.select().from(characters).where(eq(characters.id, id)).get();
+    const [created] = await db.select().from(characters).where(eq(characters.id, id)).limit(1);
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
     console.error("Failed to create character:", error);
