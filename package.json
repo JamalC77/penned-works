@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "npm run db:push:pg && next build",
-    "start": "next start",
+    "build": "next build",
+    "start": "node scripts/migrate.mjs && next start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
