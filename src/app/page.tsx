@@ -11,10 +11,24 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [newTitle, setNewTitle] = useState("");
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     loadProjects();
+    loadUser();
   }, []);
+
+  async function loadUser() {
+    try {
+      const res = await fetch("/api/auth/check");
+      if (res.ok) {
+        const data = await res.json();
+        setUsername(data.username);
+      }
+    } catch (error) {
+      console.error("Failed to load user:", error);
+    }
+  }
 
   async function loadProjects() {
     try {
@@ -85,13 +99,36 @@ export default function Home() {
     }
   }
 
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
+      router.refresh();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  }
+
   return (
     <div className="min-h-screen">
       {/* Header */}
       <header className="border-b border-zinc-200 bg-white">
-        <div className="max-w-4xl mx-auto px-6 py-6">
-          <h1 className="text-2xl font-bold text-zinc-900">PennedWorks</h1>
-          <p className="text-zinc-500 mt-1">Your writing, your vision</p>
+        <div className="max-w-4xl mx-auto px-6 py-6 flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-900">PennedWorks</h1>
+            <p className="text-zinc-500 mt-1">Your writing, your vision</p>
+          </div>
+          <div className="flex items-center gap-4">
+            {username && (
+              <span className="text-sm text-zinc-600">{username}</span>
+            )}
+            <button
+              onClick={handleLogout}
+              className="text-sm text-zinc-500 hover:text-zinc-700"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </header>
 

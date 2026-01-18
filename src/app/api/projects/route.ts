@@ -2,11 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, projects, chapters } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
+import { getSession } from "@/lib/auth/session";
 
-// GET all projects
+// GET all projects for current user
 export async function GET() {
   try {
-    const allProjects = await db.select().from(projects).orderBy(projects.updatedAt);
+    const session = await getSession();
+    if (!session.isLoggedIn || !session.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const allProjects = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.userId, session.userId))
+      .orderBy(projects.updatedAt);
     return NextResponse.json(allProjects.reverse());
   } catch (error) {
     console.error("Failed to fetch projects:", error);
@@ -17,6 +27,11 @@ export async function GET() {
 // POST create new project
 export async function POST(request: NextRequest) {
   try {
+    const session = await getSession();
+    if (!session.isLoggedIn || !session.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { title, description } = body;
 
@@ -30,6 +45,7 @@ export async function POST(request: NextRequest) {
     // Create the project
     await db.insert(projects).values({
       id: projectId,
+      userId: session.userId,
       title,
       description: description || null,
       createdAt: now,

@@ -1,28 +1,28 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 
 // Users
-export const users = sqliteTable("users", {
+export const users = pgTable("users", {
   id: text("id").primaryKey(),
   username: text("username").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   displayName: text("display_name"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
 });
 
 // Projects (a book, novel, collection, etc.)
-export const projects = sqliteTable("projects", {
+export const projects = pgTable("projects", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
 // Chapters within a project
-export const chapters = sqliteTable("chapters", {
+export const chapters = pgTable("chapters", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
@@ -31,20 +31,19 @@ export const chapters = sqliteTable("chapters", {
   content: text("content").default(""),
   order: integer("order").notNull(),
   wordCount: integer("word_count").default(0),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
 // Version history for chapters
-export const versions = sqliteTable("versions", {
+export const versions = pgTable("versions", {
   id: text("id").primaryKey(),
   chapterId: text("chapter_id")
     .notNull()
     .references(() => chapters.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
   wordCount: integer("word_count").default(0),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  // Optional label for manual saves
+  createdAt: timestamp("created_at").notNull(),
   label: text("label"),
 });
 
@@ -53,26 +52,26 @@ export const versions = sqliteTable("versions", {
 // ============================================
 
 // Characters
-export const characters = sqliteTable("characters", {
+export const characters = pgTable("characters", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  aliases: text("aliases"), // JSON array of nicknames/aliases
+  aliases: text("aliases"),
   physicalDescription: text("physical_description"),
   age: text("age"),
   personality: text("personality"),
   backstory: text("backstory"),
   notes: text("notes"),
-  firstAppearance: text("first_appearance"), // chapter id or description
-  isMainCharacter: integer("is_main_character", { mode: "boolean" }).default(false),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  firstAppearance: text("first_appearance"),
+  isMainCharacter: boolean("is_main_character").default(false),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
 // Character relationships
-export const characterRelationships = sqliteTable("character_relationships", {
+export const characterRelationships = pgTable("character_relationships", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
@@ -83,106 +82,106 @@ export const characterRelationships = sqliteTable("character_relationships", {
   character2Id: text("character2_id")
     .notNull()
     .references(() => characters.id, { onDelete: "cascade" }),
-  relationship: text("relationship").notNull(), // "mother of", "rival", "lover", etc.
+  relationship: text("relationship").notNull(),
   notes: text("notes"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
 });
 
 // Locations
-export const locations = sqliteTable("locations", {
+export const locations = pgTable("locations", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
-  sensoryDetails: text("sensory_details"), // sights, sounds, smells
+  sensoryDetails: text("sensory_details"),
   significance: text("significance"),
-  parentLocationId: text("parent_location_id"), // for nested locations (room in a house)
+  parentLocationId: text("parent_location_id"),
   firstAppearance: text("first_appearance"),
   notes: text("notes"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
 // Timeline events
-export const timelineEvents = sqliteTable("timeline_events", {
+export const timelineEvents = pgTable("timeline_events", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
-  storyDate: text("story_date"), // in-story date/time (flexible format)
+  storyDate: text("story_date"),
   duration: text("duration"),
   chapterId: text("chapter_id").references(() => chapters.id, { onDelete: "set null" }),
-  order: integer("order").notNull(), // chronological order
+  order: integer("order").notNull(),
   notes: text("notes"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
 // Important objects/items
-export const storyItems = sqliteTable("story_items", {
+export const storyItems = pgTable("story_items", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
-  significance: text("significance"), // plot importance, symbolism
-  currentPossessor: text("current_possessor"), // character id or description
+  significance: text("significance"),
+  currentPossessor: text("current_possessor"),
   firstAppearance: text("first_appearance"),
   notes: text("notes"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
 // Plot threads
-export const plotThreads = sqliteTable("plot_threads", {
+export const plotThreads = pgTable("plot_threads", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
-  status: text("status").notNull().default("active"), // active, resolved, abandoned
-  introducedIn: text("introduced_in"), // chapter reference
-  resolvedIn: text("resolved_in"), // chapter reference
+  status: text("status").notNull().default("active"),
+  introducedIn: text("introduced_in"),
+  resolvedIn: text("resolved_in"),
   notes: text("notes"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
-// World building rules (magic systems, technology, etc.)
-export const worldRules = sqliteTable("world_rules", {
+// World building rules
+export const worldRules = pgTable("world_rules", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
-  category: text("category").notNull(), // "magic", "technology", "society", "history", "language"
+  category: text("category").notNull(),
   name: text("name").notNull(),
   description: text("description"),
   limitations: text("limitations"),
   notes: text("notes"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
-// Consistency flags - AI-detected or manual notes about potential issues
-export const consistencyFlags = sqliteTable("consistency_flags", {
+// Consistency flags
+export const consistencyFlags = pgTable("consistency_flags", {
   id: text("id").primaryKey(),
   projectId: text("project_id")
     .notNull()
     .references(() => projects.id, { onDelete: "cascade" }),
-  type: text("type").notNull(), // "contradiction", "unresolved", "question"
+  type: text("type").notNull(),
   description: text("description").notNull(),
-  location1: text("location1"), // where the first mention is
-  location2: text("location2"), // where the contradiction is
-  status: text("status").notNull().default("open"), // open, resolved, ignored
+  location1: text("location1"),
+  location2: text("location2"),
+  status: text("status").notNull().default("open"),
   resolution: text("resolution"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
 });
 
 // Types for TypeScript

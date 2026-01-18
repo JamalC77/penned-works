@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       .orderBy(chapters.order);
 
     const maxOrder = existingChapters.length > 0
-      ? Math.max(...existingChapters.map(c => c.order))
+      ? Math.max(...existingChapters.map((c: { order: number }) => c.order))
       : -1;
 
     const now = new Date();

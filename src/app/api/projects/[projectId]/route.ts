@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, projects, chapters } from "@/lib/db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { getSession } from "@/lib/auth/session";
 
 type Params = Promise<{ projectId: string }>;
 
 // GET single project with chapters
 export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
+    const session = await getSession();
+    if (!session.isLoggedIn || !session.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { projectId } = await params;
 
-    const project = await db.select().from(projects).where(eq(projects.id, projectId)).get();
+    const project = await db
+      .select()
+      .from(projects)
+      .where(and(eq(projects.id, projectId), eq(projects.userId, session.userId)))
+      .get();
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -31,9 +41,25 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
 // PATCH update project
 export async function PATCH(request: NextRequest, { params }: { params: Params }) {
   try {
+    const session = await getSession();
+    if (!session.isLoggedIn || !session.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { projectId } = await params;
     const body = await request.json();
     const { title, description } = body;
+
+    // Verify ownership
+    const existing = await db
+      .select()
+      .from(projects)
+      .where(and(eq(projects.id, projectId), eq(projects.userId, session.userId)))
+      .get();
+
+    if (!existing) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
 
     await db
       .update(projects)
@@ -56,7 +82,23 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
 // DELETE project
 export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
+    const session = await getSession();
+    if (!session.isLoggedIn || !session.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { projectId } = await params;
+
+    // Verify ownership before deleting
+    const existing = await db
+      .select()
+      .from(projects)
+      .where(and(eq(projects.id, projectId), eq(projects.userId, session.userId)))
+      .get();
+
+    if (!existing) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
 
     await db.delete(projects).where(eq(projects.id, projectId));
 

@@ -1,25 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { ensureEnvLoaded } from "@/lib/env";
 
-// Load env file manually (Next.js 16 workaround)
-function loadEnv() {
-  const envPath = path.resolve(process.cwd(), ".env.local");
-  if (fs.existsSync(envPath)) {
-    const content = fs.readFileSync(envPath, "utf-8");
-    for (const line of content.split("\n")) {
-      const trimmed = line.trim();
-      if (trimmed && !trimmed.startsWith("#")) {
-        const [key, ...valueParts] = trimmed.split("=");
-        if (key && valueParts.length > 0) {
-          process.env[key] = valueParts.join("=");
-        }
-      }
-    }
-  }
-}
-
-loadEnv();
+ensureEnvLoaded();
 
 import { quickAssist } from "@/lib/ai/claude";
 
